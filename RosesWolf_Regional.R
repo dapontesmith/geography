@@ -17,7 +17,7 @@ nat <- nat %>%
   mutate(country = case_when(
     country == "UK" ~ "United Kingdom", 
     TRUE ~ country
-  ))
+  ))   
 
 #clean the gdp data
 df <- df %>%
