@@ -42,13 +42,17 @@ for link in links:
 #eliminate header rows  
 df.columns = ["location","locality","coordinates","grid_reference"]
 df = df[df["location"].str.contains("Location")==False]
-df[["location","locality","coordinates"]]
+df = df[["location","locality","coordinates"]]
 
-#coordinates are not in the right form
+#coordinates are not in the right form, but i have all the place_names
+df_names = df[["location","locality"]]
 
-df.to_csv("C:/Users/dapon/Dropbox/Harvard/dissertation/data/uk_geography/place_names_wiki.csv")
+df_names.to_csv("C:/Users/dapon/Dropbox/Harvard/dissertation/data/uk_geography/uk_placenames_wiki.csv")
 
 
+
+
+#possible code to use to get the coordinates correct ... 
 res = requests.get("https://en.wikipedia.org/wiki/List_of_United_Kingdom_locations:_Aa-Ak")
 result = {}
 soup = BeautifulSoup(res.content,'lxml')
