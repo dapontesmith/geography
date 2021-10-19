@@ -73,13 +73,49 @@ df_names.to_csv("C:/Users/dapon/Dropbox/Harvard/dissertation/data/uk_geography/u
 
 
 
+#######
+#still need to deal with seconds
+
+test = df_names["coordinates"].values.tolist()
+full_lat, full_long = [], []
+for i in range(len(test)):
+    print(i)
+    new = test[i].replace(u'°',' ').replace('\'',' ').replace('"',' ')
+    lat = [new.split()[0], new.split()[1]]
+    long = [new.split()[2], new.split()[3]]
+    for j in range(len(lat)):
+        lat[j] = lat[j].replace("N","").replace("′","")
+    if "W" in long[1]:
+        long[1] = long[1].replace("W","").replace("′","")
+        long.append(-1)
+    if "E" in long[1]:
+        long[1] = long[1].replace("E","").replace("′","")
+        long.append(1)
+    full_lat.append(int(lat[0]) + int(lat[1])*0.01)
+    full_long.append(int(long[0]) + int(long[1]) * 0.01 * int(long[2]))
+   
+   
+        
+        
+
+            
 
 
+direction = {'N':1, 'S':-1, 'E': 1, 'W':-1}
+new = test.replace(u'°',' ').replace('\'',' ').replace('"',' ')
+lat = [new.split()[0], new.split()[1]]
+long = [new.split()[2], new.split()[3]]
 
+for 
 
-
-
-
+for i in range(len(lat)):
+    lat[i] = lat[i].replace("N","").replace("′","")
+for i in range(len(long)):
+    if "W" in long[i]:
+        long[i] = long[i].replace("W","").replace("′","")
+    if "E" in long[i]:
+        long[i] = long[i].replace("E","").replace("′","")
+        
 
 
 
