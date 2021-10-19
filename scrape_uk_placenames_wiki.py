@@ -62,8 +62,34 @@ for i in range(len(coordinates)):
 
 df_names["coordinates"] = coord_list
 
+#clean the remaining messy coordinate entries
+for i in range(len(df_names)):
+    if "parser" in df_names['coordinates'].iloc[i]:
+        df_names["coordinates"].iloc[i] = df_names["coordinates"].iloc[i].split(":nowrap}")[1].split(u"\ufeff")[0]
+
 #write to csv
 df_names.to_csv("C:/Users/dapon/Dropbox/Harvard/dissertation/data/uk_geography/uk_placenames_wiki.csv")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+####################################################################
+####################################################################
+###################################################################
+
 
 
 
@@ -105,6 +131,5 @@ longitude = [coord_holder[i].split("; ")[1] for i in range(len(coord_holder))]
 
 
 
-for i in range(len(df)):
-    test[i] = df.iloc[i, 2].replace(u"\ufeff","").split(" / ")[0]
-test = test[1]
+test = df_names.copy()
+
