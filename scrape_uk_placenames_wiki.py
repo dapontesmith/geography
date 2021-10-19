@@ -8,7 +8,8 @@ Created on Thu Oct 14 19:44:46 2021
 from bs4 import BeautifulSoup
 import requests
 import pandas as pd
-from time import sleep
+import re
+stripped = re.sub("[$@*&?].*[$@*&?]", "", stringfrom time import sleep
 
 #set url for all place-names
 url = "https://en.wikipedia.org/wiki/List_of_United_Kingdom_locations"
@@ -54,7 +55,7 @@ df_names = df_clean[["location","locality"]]
 
 #
 coord_list = []
-coordinates = df[["coordinates"]].values.tolist()
+coordinates = df_clean[["coordinates"]].values.tolist()
 #get list of coordinates
 for i in range(len(coordinates)):
     print(i)
@@ -67,38 +68,49 @@ for i in range(len(df_names)):
     if "parser" in df_names['coordinates'].iloc[i]:
         df_names["coordinates"].iloc[i] = df_names["coordinates"].iloc[i].split(":nowrap}")[1].split(u"\ufeff")[0]
 
-#write to csv
-df_names.to_csv("C:/Users/dapon/Dropbox/Harvard/dissertation/data/uk_geography/uk_placenames_wiki.csv")
 
 
 
-
-#######
-#still need to deal with seconds
-
+#put coordinates int oa list 
 test = df_names["coordinates"].values.tolist()
+#initialize empty lists
 full_lat, full_long = [], []
+#loop over lists 
 for i in range(len(test)):
     print(i)
+    #get rid of degrees and minutes signs
     new = test[i].replace(u'°',' ').replace('\'',' ').replace('"',' ')
+    #get rid of the coordinates' seconds - this sacrificies some precision,
+    #leaving us with only degrees and minutes 
+    new = re.sub(r'′.+?″', '', new)
+    
+    #put lat andlong into separate lists 
     lat = [new.split()[0], new.split()[1]]
     long = [new.split()[2], new.split()[3]]
+    #do some string replacememnt of cardinal directions in lat and long
+    if "″" in lat:
+        lat = re.sub
     for j in range(len(lat)):
         lat[j] = lat[j].replace("N","").replace("′","")
     if "W" in long[1]:
         long[1] = long[1].replace("W","").replace("′","")
+        #do this to get W coordinates to be negative
         long.append(-1)
     if "E" in long[1]:
         long[1] = long[1].replace("E","").replace("′","")
         long.append(1)
+    #simply add them together to get coordinates, making east ones negative
     full_lat.append(int(lat[0]) + int(lat[1])*0.01)
-    full_long.append(int(long[0]) + int(long[1]) * 0.01 * int(long[2]))
+    full_long.append((int(long[0]) + int(long[1]) * 0.01) * int(long[2]))
    
-   
+df_names["latitude"] = full_lat
+df_names['longitude'] = full_long
         
         
 
-            
+#write to csv
+df_names.to_csv("C:/Users/dapon/Dropbox/Harvard/dissertation/data/uk_geography/uk_placenames_wiki.csv")
+        
 
 
 direction = {'N':1, 'S':-1, 'E': 1, 'W':-1}
