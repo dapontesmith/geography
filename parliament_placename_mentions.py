@@ -12,8 +12,13 @@ places_df = pd.read_csv("C:/Users/dapon/Dropbox/Harvard/dissertation/data/uk_geo
 #read in speeches data
 speeches = pd.read_csv("C:/Users/dapon/Dropbox/Harvard/dissertation/data/ParlSpeech/HouseOfCommons_Sample.csv",
                        encoding="ISO-8859-1")
+
+#speeches = pd.read_csv("C:/Users/dapon/Dropbox/Harvard/dissertation/data/ParlSpeech/HouseOfCommons.csv",
+ #                      encoding="ISO-8859-1")
+ 
 #put places data in list 
 places = places_df[["location"]].values.tolist()
+
 places_df["location"].nunique() #note that there are only about 38000 unique places, but 44000 places overall
 
 
@@ -25,16 +30,19 @@ speakers = speeches["speaker"].unique().tolist()
 speaker_list, place_list, mention_list = [],[],[]
 df = pd.DataFrame()
 
+#THIS WORKS, BUT IT'S SLOW ... perhaps inevitable due to size of data
+
 #loop over speakers 
 for speaker in speakers:
     #subset df to only that speaker's speeches 
     speaker_speeches = speeches[speeches["speaker"] == speaker]["text"]
+    #loop over places
     for place in places:
         #count number of times place is mentioned, append to mention_list
-        mention_list.append(speaker_speeches.str.count(place).sum())
+        mention_list.append(speaker_speeches.str.count(place[0]).sum())
         #append speaker and place to lists 
         speaker_list.append(speaker)
-        place_list.append(place)
+        place_list.append(place[0])
         #put it all in a dataframe
         df_out = pd.DataFrame(list(zip(speaker_list, place_list, mention_list)),
                               columns = ["speaker", "place","count"])
