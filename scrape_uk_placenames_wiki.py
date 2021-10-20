@@ -9,7 +9,6 @@ from bs4 import BeautifulSoup
 import requests
 import pandas as pd
 import re
-stripped = re.sub("[$@*&?].*[$@*&?]", "", stringfrom time import sleep
 
 #set url for all place-names
 url = "https://en.wikipedia.org/wiki/List_of_United_Kingdom_locations"
@@ -59,7 +58,7 @@ coordinates = df_clean[["coordinates"]].values.tolist()
 #get list of coordinates
 for i in range(len(coordinates)):
     print(i)
-    coord_list.append(coordinates[i][0].replace(u"\ufeff","").split(" / ")[0])
+    coord_list.append(coordinates[i][0].replace(u"\ufeff","").split(" / ")[1])
 
 df_names["coordinates"] = coord_list
 
@@ -72,37 +71,53 @@ for i in range(len(df_names)):
 
 
 #put coordinates int oa list 
-test = df_names["coordinates"].values.tolist()
+coords = df_names["coordinates"].values.tolist()
+
+#this deals with cases that have both coordinates (incorrect and correct) in a different format
+test = []
+for i in range(len(coords)):
+    print(i)
+    if coords[i].count("N") == 2:
+        test.append(coords[i].split(" ", 2)[2])
+    else:
+        test.append(coords[i])
+
+
+
 #initialize empty lists
 full_lat, full_long = [], []
 #loop over lists 
 for i in range(len(test)):
     print(i)
     #get rid of degrees and minutes signs
-    new = test[i].replace(u'°',' ').replace('\'',' ').replace('"',' ')
+    new = test[i].replace(u'°',' ').replace('\'','').replace('"','')
     #get rid of the coordinates' seconds - this sacrificies some precision,
     #leaving us with only degrees and minutes 
     new = re.sub(r'′.+?″', '', new)
     
+    #we have to do this to deal with one aberrant case (index 8750)
+    if "." in new:
     #put lat andlong into separate lists 
-    lat = [new.split()[0], new.split()[1]]
-    long = [new.split()[2], new.split()[3]]
-    #do some string replacememnt of cardinal directions in lat and long
-    if "″" in lat:
-        lat = re.sub
-    for j in range(len(lat)):
-        lat[j] = lat[j].replace("N","").replace("′","")
-    if "W" in long[1]:
-        long[1] = long[1].replace("W","").replace("′","")
-        #do this to get W coordinates to be negative
-        long.append(-1)
-    if "E" in long[1]:
-        long[1] = long[1].replace("E","").replace("′","")
-        long.append(1)
+        lat = new.split(' N')[0]
+        long = new.split(" N ")[1]
+        #do some string replacememnt of cardinal directions in lat and long
+        #for j in range(len(lat)):
+            #   lat[j] = lat[j].replace("N","").replace("′","")
+        if "W" in long:
+            long = long.replace(" W","").replace("′","")
+            #do this to get W coordinates to be negative
+            long_right = float(long) * -1
+        if "E" in long:
+            long_right = long.replace("E","").replace("′","")
+    #if the coordinates are in a bad format, just skip them (only happens on index 8750)
+    else: 
+        lat = []
+        long = []
     #simply add them together to get coordinates, making east ones negative
-    full_lat.append(int(lat[0]) + int(lat[1])*0.01)
-    full_long.append((int(long[0]) + int(long[1]) * 0.01) * int(long[2]))
+    full_lat.append(lat)
+    full_long.append(long_right)
    
+#put lists as columns of dataframe    
 df_names["latitude"] = full_lat
 df_names['longitude'] = full_long
         
@@ -111,6 +126,13 @@ df_names['longitude'] = full_long
 #write to csv
 df_names.to_csv("C:/Users/dapon/Dropbox/Harvard/dissertation/data/uk_geography/uk_placenames_wiki.csv")
         
+
+
+####################################################################
+####################################################################
+###################################################################
+
+
 
 
 direction = {'N':1, 'S':-1, 'E': 1, 'W':-1}
@@ -128,18 +150,6 @@ for i in range(len(long)):
     if "E" in long[i]:
         long[i] = long[i].replace("E","").replace("′","")
         
-
-
-
-
-
-
-####################################################################
-####################################################################
-###################################################################
-
-
-
 
 #possible code to use to get the coordinates correct ... 
 res = requests.get("https://en.wikipedia.org/wiki/List_of_United_Kingdom_locations:_Aa-Ak")
