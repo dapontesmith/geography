@@ -25,5 +25,21 @@ mps_england.columns = ["mp","constit","party","in_constit_since"]
 #clean up the in_constit_since variable
 mps_england["in_constit_since"] = mps_england["in_constit_since"].str.replace(" by-election","")
 mps_england["in_constit_since"] = mps_england["in_constit_since"].str[:4]
+mps_england.party = mps_england.party.str.replace("labour Co-op","Labour")
 
 mps_england.to_csv("C:/Users/dapon/Dropbox/Harvard/dissertation/data/paper2/mps_constit_2019.csv")
+
+
+
+#do again for 2017 
+link = "https://en.wikipedia.org/wiki/List_of_MPs_elected_in_the_2017_United_Kingdom_general_election"
+r = requests.get(link, verify = False).content
+#soup = BeautifulSoup(r.text, "html.parser")
+content = pd.read_html(r)
+
+mps = content[6]
+
+mps = mps[["Constituency","Party.1","Member returned (2017)[9]"]]
+mps.columns = ["constit","party","mp"]
+mps["party"] = mps["party"].str.replace("Labour Co-operative","Labour")
+mps.to_csv("C:/Users/dapon/Dropbox/Harvard/dissertation/data/paper2/mps_constit_2017.csv")
